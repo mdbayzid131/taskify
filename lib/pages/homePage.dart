@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:taskify/route/route.dart';
+import '../controller/auth_comtroller.dart';
 import '../widgets/to_do _list.dart';
 
 class Homepage extends StatefulWidget {
@@ -11,13 +12,15 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  final authC = Get.put(AuthController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Taskify ToDo List', style: TextStyle(fontSize: 20)),
         actions: [
-          Icon(Icons.calendar_month_outlined, size: 25),
+          IconButton(onPressed: () { authC.signOut(); },
+          icon:  Icon(Icons.calendar_month_outlined, size: 25)),
           SizedBox(width: 10),
         ],
       ),

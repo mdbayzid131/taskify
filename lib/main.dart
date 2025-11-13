@@ -22,8 +22,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: false,
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xffb7b8bd)),
       ),
-      home: Homepage(),
-      initialRoute: RoutePages.homePage,
+      initialRoute: RoutePages.splashPage,
       getPages: getPages,
     );
   }
