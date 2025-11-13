@@ -1,28 +1,40 @@
 class ToDoModel {
   final String id;
-   String title;
-   String description;
+  final String title;
+  final String description;
   final bool isDone;
 
   ToDoModel({
     required this.id,
     required this.title,
     required this.description,
-    this.isDone = false,
+    required this.isDone,
   });
 
-  // Convert data when receiving from Firebase
-  factory ToDoModel.fromMap(Map<String, dynamic> map, String documentId) {
+
+  factory ToDoModel.fromMap(Map<String, dynamic> map, String id) {
     return ToDoModel(
-      id: documentId,
+      id: id,
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       isDone: map['isDone'] ?? false,
     );
   }
 
-  // Convert data when sending to Firebase
+  ToDoModel copyWith({
+    String? title,
+    String? description,
+    bool? isDone,
+  }) {
+    return ToDoModel(
+      id: id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      isDone: isDone ?? this.isDone,
+    );
+  }
 
+  //
   Map<String, dynamic> toMap() {
     return {
       'title': title,
