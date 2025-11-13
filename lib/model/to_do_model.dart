@@ -1,7 +1,7 @@
 class ToDoModel {
   final String id;
-  final String title;
-  final String description;
+   String title;
+   String description;
   final bool isDone;
 
   ToDoModel({
@@ -11,7 +11,7 @@ class ToDoModel {
     this.isDone = false,
   });
 
-  // 🔸 Firebase থেকে ডাটা পাওয়ার সময় কনভার্ট করতে
+  // Convert data when receiving from Firebase
   factory ToDoModel.fromMap(Map<String, dynamic> map, String documentId) {
     return ToDoModel(
       id: documentId,
@@ -21,7 +21,8 @@ class ToDoModel {
     );
   }
 
-  // 🔸 Firebase এ ডাটা পাঠানোর সময় কনভার্ট করতে
+  // Convert data when sending to Firebase
+
   Map<String, dynamic> toMap() {
     return {
       'title': title,

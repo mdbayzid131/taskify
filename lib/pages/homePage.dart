@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:taskify/route/route.dart';
 import '../widgets/to_do _list.dart';
-import 'add_task_page.dart';
+
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
 
@@ -24,15 +26,9 @@ class _HomepageState extends State<Homepage> {
         child: Column(children: [ToDoList()]),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return AddTaskPage();
-              },
-            ),
-          );
+          Get.toNamed(RoutePages.addTask);
         },
         child: Icon(Icons.add),
       ),

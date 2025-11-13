@@ -1,7 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:taskify/controller/home_page_controller.dart';
+import 'package:taskify/route/route.dart';
 import '../model/to_do_model.dart';
-import '../pages/task_ditails.dart';
 
 class ToDoList extends StatefulWidget {
   const ToDoList({super.key});
@@ -11,38 +12,27 @@ class ToDoList extends StatefulWidget {
 }
 
 class _ToDoListState extends State<ToDoList> {
-  Stream<List<ToDoModel>> getTasks() {
-    return FirebaseFirestore.instance
-        .collection('tasks')
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => ToDoModel.fromMap(doc.data(), doc.id))
-              .toList(),
-        );
-  }
-
-  void deleteTask(String id) {
-    FirebaseFirestore.instance.collection('tasks').doc(id).delete();
-  }
-
-  void toggleTask(String id, bool currentValue) {
-    FirebaseFirestore.instance.collection('tasks').doc(id).update({
-      'isDone': !currentValue,
-    });
-  }
+  final _controller = Get.put(HomePageController());
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<ToDoModel>>(
-      stream: getTasks(),
+      stream: _controller.getTasks(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No tasks available.'));
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height*.4,),
+
+              const Center(child: Text('No tasks available.',style: TextStyle(fontSize: 22),)),
+            ],
+          );
         }
 
         final tasks = snapshot.data!;
@@ -56,9 +46,10 @@ class _ToDoListState extends State<ToDoList> {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
               child: Card(
+
                 color: task.isDone ? Colors.green.shade50 : Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                   side: BorderSide(
                     color: task.isDone
                         ? Colors.greenAccent
@@ -67,8 +58,11 @@ class _ToDoListState extends State<ToDoList> {
                   ),
                 ),
                 child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
                   title: Text(
                     task.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -77,11 +71,18 @@ class _ToDoListState extends State<ToDoList> {
                           : null,
                     ),
                   ),
-                  subtitle: Text(
-                    task.description,
-                    style: TextStyle(
-                      color: task.isDone ? Colors.grey : Colors.black54,
-                    ),
+                  subtitle: Column(
+                    children: [
+                      SizedBox(height: 5,),
+                      Text(
+                        task.description,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: task.isDone ? Colors.grey : Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                   trailing: Wrap(
                     spacing: 2,
@@ -91,32 +92,28 @@ class _ToDoListState extends State<ToDoList> {
                           Icons.delete_outline,
                           color: Colors.red,
                         ),
-                        onPressed: () => deleteTask(task.id),
+                        onPressed: () => _controller.deleteTask(task.id),
                       ),
                       Checkbox(
                         activeColor: Colors.green,
                         value: task.isDone,
-                        onChanged: (_) => toggleTask(task.id, task.isDone),
+                        onChanged: (_) =>
+                            _controller.toggleTask(task.id, task.isDone),
                       ),
                     ],
                   ),
                   onTap: () async {
-                    final updatedData = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            TaskDetails(task: task),
-                      ),
+                    final updatedData = await Get.toNamed(
+                      RoutePages.taskDetails,
+                      arguments: task,
                     );
+
                     if (updatedData != null) {
-                      // Firestore update
-                      await FirebaseFirestore.instance
-                          .collection('tasks')
-                          .doc(task.id) // task এর id ব্যবহার
-                          .update({
-                            'title': updatedData['title'],
-                            'description': updatedData['description'],
-                          });
+                      //  Update local UI
+                      setState(() {
+                        task.title = updatedData['title'];
+                        task.description = updatedData['description'];
+                      });
                     }
                   },
                 ),

@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../model/to_do_model.dart';
 
 class TaskDetails extends StatefulWidget {
-  final ToDoModel task;
-  const TaskDetails({super.key, required this.task});
+
+  const TaskDetails({super.key, });
 
   @override
   State<TaskDetails> createState() => _TaskDetailsState();
@@ -14,14 +16,15 @@ class _TaskDetailsState extends State<TaskDetails> {
   late bool isReadOnly;
   late TextEditingController titleController;
   late TextEditingController descriptionController;
+  late ToDoModel task;
 
   @override
-  void initState() {
-    super.initState();
-    // ✅ Initialize values from passed task
+  void didChangeDependencies() {
+    task = Get.arguments as ToDoModel;
     isReadOnly = true;
-    titleController = TextEditingController(text: widget.task.title);
-    descriptionController = TextEditingController(text: widget.task.description);
+    titleController = TextEditingController(text: task.title);
+    descriptionController = TextEditingController(text: task.description);
+    super.didChangeDependencies();
   }
 
   @override
@@ -31,46 +34,64 @@ class _TaskDetailsState extends State<TaskDetails> {
     super.dispose();
   }
 
-   toggleEditOrSave() {
+
+  toggleEditOrSave() async {
     if (isReadOnly) {
-      // 📝 Enable editing mode
+      // Enable editing
       setState(() => isReadOnly = false);
     } else {
-      // 💾 Save mode
+      // Save mode
       setState(() => isReadOnly = true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(' Task updated successfully!'),
-          backgroundColor: Colors.green,
-          duration: Duration(milliseconds: 800),
-        ),
-      );
-
-      // 🕒 Pop back with updated data
-      Future.delayed(const Duration(milliseconds: 600), () {
-        Navigator.pop(context, {
-         "title" : titleController.text.trim(),
-          "description": descriptionController.text.trim(),
+      try {
+        // ✅ Firestore update call
+        await FirebaseFirestore.instance
+            .collection('tasks')
+            .doc(task.id)
+            .update({
+          'title': titleController.text.trim(),
+          'description': descriptionController.text.trim(),
         });
-      });
+
+        Get.snackbar(
+          'Success',
+          'Task updated successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(milliseconds: 1200),
+        );
+
+        // ✅ Return updated data to UI
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.back(result: {
+          'title': titleController.text.trim(),
+          'description': descriptionController.text.trim(),
+        });
+      } catch (e) {
+        Get.snackbar(
+          'Error',
+          'Failed to update task: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    final task =widget.task;
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F5F9),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.blueAccent,
         title: Text(
-          task.title,
+          "Task Details",
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
           ),
         ),
         actions: const [
@@ -92,16 +113,13 @@ class _TaskDetailsState extends State<TaskDetails> {
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                labelText: "Task Title",
-                labelStyle: const TextStyle(color: Colors.blueGrey),
+                hintText: "Task Title",
+                hintStyle: const TextStyle(color: Colors.blueGrey),
                 filled: true,
                 fillColor: Colors.white,
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+
+                border: OutlineInputBorder(
+                  borderSide:  BorderSide.none,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -113,17 +131,13 @@ class _TaskDetailsState extends State<TaskDetails> {
               maxLines: 7,
               style: const TextStyle(fontSize: 16, height: 1.4),
               decoration: InputDecoration(
-                labelText: "Description",
+                hintText: "Description",
                 alignLabelWithHint: true,
-                labelStyle: const TextStyle(color: Colors.blueGrey),
+                hintStyle: const TextStyle(color: Colors.blueGrey),
                 filled: true,
                 fillColor: Colors.white,
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                border: OutlineInputBorder(
+                  borderSide:  BorderSide.none,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -132,7 +146,7 @@ class _TaskDetailsState extends State<TaskDetails> {
             ElevatedButton.icon(
               onPressed: toggleEditOrSave,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isReadOnly ? Colors.blueAccent : Colors.green,
+                backgroundColor: isReadOnly ? Theme.of(context).colorScheme.primary : Colors.green,
                 minimumSize: const Size(double.infinity, 55),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class AddTaskPage extends StatelessWidget {
   AddTaskPage({super.key});
@@ -13,17 +14,17 @@ class AddTaskPage extends StatelessWidget {
     if (_formKey.currentState!.validate()) {
       await FirebaseFirestore.instance.collection("tasks").add({
         'title': titleCtrl.text.trim(),
-        'subtitle': discCtrl.text.trim(),
+        'description': discCtrl.text.trim(),
         'isDone': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      Navigator.pop(context);
+      Get.back();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(' Task added successfully!'),
-          backgroundColor: Colors.green,
-        ),
+      Get.snackbar(
+        'Success',
+        'Task added successfully!',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
     }
   }
@@ -50,8 +51,7 @@ class AddTaskPage extends StatelessWidget {
               TextFormField(
                 controller: titleCtrl,
                 decoration: InputDecoration(
-                  labelText: "Title",
-                  hintText: "Enter task title",
+                  hintText: "Title",
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -70,7 +70,6 @@ class AddTaskPage extends StatelessWidget {
                 controller: discCtrl,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  labelText: "Description",
                   hintText: "Write something about the task...",
                   filled: true,
                   fillColor: Colors.white,

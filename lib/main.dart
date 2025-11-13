@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:taskify/pages/homePage.dart';
+import 'package:taskify/route/route.dart';
 
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +14,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Taskify | To Do App',
       theme: ThemeData(
@@ -21,6 +23,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xffb7b8bd)),
       ),
       home: Homepage(),
+      initialRoute: RoutePages.homePage,
+      getPages: getPages,
     );
   }
 }
