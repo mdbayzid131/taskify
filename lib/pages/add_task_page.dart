@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,10 +10,11 @@ class AddTaskPage extends StatelessWidget {
   final TextEditingController discCtrl = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+  String get uid => FirebaseAuth.instance.currentUser!.uid;
   void _addTask(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      await FirebaseFirestore.instance.collection("tasks").add({
+      await FirebaseFirestore.instance.collection('users')
+          .doc(uid).collection("tasks").add({
         'title': titleCtrl.text.trim(),
         'description': discCtrl.text.trim(),
         'isDone': false,

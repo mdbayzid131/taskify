@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:taskify/controller/home_page_controller.dart';
 import 'package:taskify/route/route.dart';
-import '../model/to_do_model.dart';
 
 class ToDoList extends StatefulWidget {
   const ToDoList({super.key});

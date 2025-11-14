@@ -11,7 +11,7 @@ class ToDoModel {
     required this.isDone,
   });
 
-
+  // Firestore → Model
   factory ToDoModel.fromMap(Map<String, dynamic> map, String id) {
     return ToDoModel(
       id: id,
@@ -21,6 +21,16 @@ class ToDoModel {
     );
   }
 
+  // Model → Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'isDone': isDone,
+    };
+  }
+
+  // Update Model Data (Optional)
   ToDoModel copyWith({
     String? title,
     String? description,
@@ -32,14 +42,5 @@ class ToDoModel {
       description: description ?? this.description,
       isDone: isDone ?? this.isDone,
     );
-  }
-
-  //
-  Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'description': description,
-      'isDone': isDone,
-    };
   }
 }
